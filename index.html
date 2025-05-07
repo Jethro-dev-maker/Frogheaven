@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tadpole Generator with Multiple Luck Boosts</title>
+  <title>Tadpole Generator with Upgrades</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -47,6 +47,10 @@
       background-color: #26a69a;
     }
 
+    .upgrade-btn {
+      background-color: #8bc34a;
+    }
+
     p, h3 {
       font-size: 18px;
       margin: 10px 0;
@@ -55,10 +59,6 @@
     #output {
       font-weight: bold;
       margin: 15px 0;
-    }
-
-    #currency, #luck {
-      font-weight: bold;
     }
 
     ul {
@@ -86,8 +86,16 @@
   <h1>🐸 Tadpole Generator</h1>
 
   <div class="section">
-    <button onclick="addCurrency()">Earn +1 Currency</button>
+    <button onclick="addCurrency()">Earn +<span id="earnRateDisplay">1</span> Currency</button>
     <p>Currency: <span id="currency">0</span></p>
+  </div>
+
+  <div class="section">
+    <h3>Upgrades</h3>
+    <p>Current Earn Rate: <span id="earnRateLevel">+1</span></p>
+    <button class="upgrade-btn" onclick="upgradeEarning()">
+      Upgrade to +<span id="nextEarnRate">2</span> (Cost: <span id="upgradeCost">10000</span>)
+    </button>
   </div>
 
   <div class="section">
@@ -114,14 +122,55 @@
     let currency = parseInt(localStorage.getItem("currency")) || 0;
     let history = JSON.parse(localStorage.getItem("history")) || [];
     let luckMultiplier = parseFloat(localStorage.getItem("luckMultiplier")) || 1;
+    let earnRate = parseInt(localStorage.getItem("earnRate")) || 1;
+
+    const upgradeSteps = [
+      { rate: 2, cost: 10000 },
+      { rate: 3, cost: 50000 },
+      { rate: 5, cost: 100000 },
+    ];
 
     document.getElementById("currency").innerText = currency;
     document.getElementById("luck").innerText = luckMultiplier > 1 ? `${luckMultiplier}x` : "None";
+    document.getElementById("earnRateDisplay").innerText = earnRate;
+    document.getElementById("earnRateLevel").innerText = `+${earnRate}`;
+    updateUpgradeDisplay();
     updateHistoryDisplay();
 
     function addCurrency() {
-      currency++;
+      currency += earnRate;
       updateCurrency();
+    }
+
+    function upgradeEarning() {
+      const currentStep = upgradeSteps.find(step => step.rate > earnRate);
+      if (!currentStep) {
+        alert("Max upgrade reached!");
+        return;
+      }
+
+      if (currency >= currentStep.cost) {
+        currency -= currentStep.cost;
+        earnRate = currentStep.rate;
+        localStorage.setItem("earnRate", earnRate);
+        updateCurrency();
+        updateUpgradeDisplay();
+      } else {
+        alert("Not enough currency to upgrade.");
+      }
+    }
+
+    function updateUpgradeDisplay() {
+      const nextStep = upgradeSteps.find(step => step.rate > earnRate);
+      if (nextStep) {
+        document.getElementById("nextEarnRate").innerText = nextStep.rate;
+        document.getElementById("upgradeCost").innerText = nextStep.cost;
+        document.getElementById("earnRateLevel").innerText = `+${earnRate}`;
+        document.getElementById("earnRateDisplay").innerText = earnRate;
+      } else {
+        document.querySelector(".upgrade-btn").disabled = true;
+        document.querySelector(".upgrade-btn").innerText = "Max Upgrade Reached";
+      }
     }
 
     function buyLuckBoost(multiplier, cost) {
@@ -161,13 +210,13 @@
       let tadpoles = cost === 100 ? rareTadpoles : standardTadpoles;
 
       let totalWeight = 0;
-      const boosted = tadpoles.map(tadpole => {
-        const boostedRarity = tadpole.rarity * luckMultiplier;
+      const boosted = tadpoles.map(t => {
+        const boostedRarity = t.rarity * luckMultiplier;
         totalWeight += boostedRarity;
-        return { ...tadpole, boostedRarity };
+        return { ...t, boostedRarity };
       });
 
-      let roll = Math.random() * totalWeight;
+      const roll = Math.random() * totalWeight;
       let cumulative = 0;
       let chosen = "Nothing—try again!";
 
@@ -183,7 +232,7 @@
 
       if (chosen !== "Nothing—try again!") {
         history.push(chosen);
-        if (history.length > 50) history.shift(); // limit history
+        if (history.length > 50) history.shift();
         localStorage.setItem("history", JSON.stringify(history));
       }
 
@@ -198,15 +247,14 @@
     }
 
     function updateHistoryDisplay() {
-      let list = document.getElementById("history");
+      const list = document.getElementById("history");
       list.innerHTML = "";
-      history.slice().reverse().forEach(tad => {
-        let li = document.createElement("li");
-        li.innerText = tad;
+      history.slice().reverse().forEach(t => {
+        const li = document.createElement("li");
+        li.innerText = t;
         list.appendChild(li);
       });
     }
   </script>
 </body>
 </html>
-
