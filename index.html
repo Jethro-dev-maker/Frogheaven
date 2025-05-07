@@ -1,1 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tadpole Generator with Multiple Luck Boosts</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #e0f7fa;
+      color: #004d40;
+      text-align: center;
+      padding: 30px;
+    }
+
+    h1 {
+      color: #00796b;
+      margin-bottom: 10px;
+    }
+
+    .section {
+      background-color: #ffffffcc;
+      padding: 20px;
+      margin: 15px auto;
+      border-radius: 12px;
+      max-width: 500px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    button {
+      background-color: #00796b;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      margin: 6px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-size: 15px;
+    }
+
+    button:hover {
+      background-color: #004d40;
+    }
+
+    .boost-btn {
+      background-color: #26a69a;
+    }
+
+    p, h3 {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+
+    #output {
+      font-weight: bold;
+      margin: 15px 0;
+    }
+
+    #currency, #luck {
+      font-weight: bold;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    li {
+      background-color: #b2dfdb;
+      margin: 5px auto;
+      padding: 8px 12px;
+      max-width: 300px;
+      border-radius: 6px;
+    }
+
+    @media (max-width: 600px) {
+      button {
+        width: 90%;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🐸 Tadpole Generator</h1>
+
+  <div class="section">
+    <button onclick="addCurrency()">Earn +1 Currency</button>
+    <p>Currency: <span id="currency">0</span></p>
+  </div>
+
+  <div class="section">
+    <h3>Buy Luck Boost</h3>
+    <button class="boost-btn" onclick="buyLuckBoost(1.5, 200)">1.5× Luck (200)</button>
+    <button class="boost-btn" onclick="buyLuckBoost(3, 400)">3× Luck (400)</button>
+    <button class="boost-btn" onclick="buyLuckBoost(5, 800)">5× Luck (800)</button>
+    <p>Current Boost: <span id="luck">None</span></p>
+  </div>
+
+  <div class="section">
+    <h3>Open Crates</h3>
+    <button onclick="generateTadpole(50)">Standard Tadpole Crate (50)</button>
+    <button onclick="generateTadpole(100)">Rare Tadpole Crate (100)</button>
+    <p id="output"></p>
+  </div>
+
+  <div class="section">
+    <h3>Hatching History</h3>
+    <ul id="history"></ul>
+  </div>
+
+  <script>
+    let currency = parseInt(localStorage.getItem("currency")) || 0;
+    let history = JSON.parse(localStorage.getItem("history")) || [];
+    let luckMultiplier = parseFloat(localStorage.getItem("luckMultiplier")) || 1;
+
+    document.getElementById("currency").innerText = currency;
+    document.getElementById("luck").innerText = luckMultiplier > 1 ? `${luckMultiplier}x` : "None";
+    updateHistoryDisplay();
+
+    function addCurrency() {
+      currency++;
+      updateCurrency();
+    }
+
+    function buyLuckBoost(multiplier, cost) {
+      if (currency >= cost) {
+        currency -= cost;
+        luckMultiplier = multiplier;
+        updateCurrency();
+        document.getElementById("luck").innerText = `${luckMultiplier}x`;
+        localStorage.setItem("luckMultiplier", luckMultiplier);
+      } else {
+        alert("Not enough currency for that boost!");
+      }
+    }
+
+    function generateTadpole(cost) {
+      if (currency < cost) {
+        document.getElementById("output").innerText = "Not enough currency!";
+        return;
+      }
+
+      const standardTadpoles = [
+        { name: "Common Frog Tadpole", rarity: 50 },
+        { name: "Bullfrog Tadpole", rarity: 25 },
+        { name: "Tree Frog Tadpole", rarity: 15 },
+        { name: "Axolotl Larvae", rarity: 7 },
+        { name: "Poison Dart Frog Tadpole", rarity: 3 },
+      ];
+
+      const rareTadpoles = [
+        { name: "Common Frog Tadpole", rarity: 20 },
+        { name: "Bullfrog Tadpole", rarity: 20 },
+        { name: "Tree Frog Tadpole", rarity: 25 },
+        { name: "Axolotl Larvae", rarity: 20 },
+        { name: "Poison Dart Frog Tadpole", rarity: 15 },
+      ];
+
+      let tadpoles = cost === 100 ? rareTadpoles : standardTadpoles;
+
+      let totalWeight = 0;
+      const boosted = tadpoles.map(tadpole => {
+        const boostedRarity = tadpole.rarity * luckMultiplier;
+        totalWeight += boostedRarity;
+        return { ...tadpole, boostedRarity };
+      });
+
+      let roll = Math.random() * totalWeight;
+      let cumulative = 0;
+      let chosen = "Nothing—try again!";
+
+      for (let tad of boosted) {
+        cumulative += tad.boostedRarity;
+        if (roll <= cumulative) {
+          chosen = tad.name;
+          break;
+        }
+      }
+
+      document.getElementById("output").innerText = "🎉 Random Tadpole: " + chosen;
+
+      if (chosen !== "Nothing—try again!") {
+        history.push(chosen);
+        if (history.length > 50) history.shift(); // limit history
+        localStorage.setItem("history", JSON.stringify(history));
+      }
+
+      currency -= cost;
+      updateCurrency();
+      updateHistoryDisplay();
+    }
+
+    function updateCurrency() {
+      document.getElementById("currency").innerText = currency;
+      localStorage.setItem("currency", currency);
+    }
+
+    function updateHistoryDisplay() {
+      let list = document.getElementById("history");
+      list.innerHTML = "";
+      history.slice().reverse().forEach(tad => {
+        let li = document.createElement("li");
+        li.innerText = tad;
+        list.appendChild(li);
+      });
+    }
+  </script>
+</body>
+</html>
 
