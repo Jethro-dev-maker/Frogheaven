@@ -6,59 +6,75 @@
   <title>Tadpole Generator with Upgrades</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #e0f7fa;
-      color: #004d40;
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #f0f8ff, #cce7e6);
+      color: #003d33;
       text-align: center;
       padding: 30px;
     }
 
     h1 {
-      color: #00796b;
+      font-size: 36px;
+      color: #008080;
+      text-shadow: 2px 2px 8px rgba(0, 128, 128, 0.6);
       margin-bottom: 10px;
     }
 
     .section {
-      background-color: #ffffffcc;
+      background-color: rgba(255, 255, 255, 0.9);
       padding: 20px;
-      margin: 15px auto;
-      border-radius: 12px;
-      max-width: 500px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      margin: 20px auto;
+      border-radius: 15px;
+      max-width: 600px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .section h3 {
+      font-size: 24px;
+      color: #00796b;
     }
 
     button {
-      background-color: #00796b;
+      background-color: #26a69a;
       color: white;
       border: none;
-      padding: 10px 16px;
-      margin: 6px;
-      border-radius: 8px;
+      padding: 14px 28px;
+      margin: 12px;
+      border-radius: 12px;
+      font-size: 18px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
-      font-size: 15px;
+      transition: background-color 0.3s, transform 0.2s;
     }
 
     button:hover {
-      background-color: #004d40;
+      background-color: #00796b;
+      transform: scale(1.05);
+    }
+
+    button:disabled {
+      background-color: #bdbdbd;
+      cursor: not-allowed;
     }
 
     .boost-btn {
-      background-color: #26a69a;
+      background-color: #4caf50;
     }
 
     .upgrade-btn {
       background-color: #8bc34a;
     }
 
-    p, h3 {
-      font-size: 18px;
-      margin: 10px 0;
+    .currency-info, .upgrade-info {
+      font-size: 20px;
+      font-weight: bold;
+      color: #004d40;
     }
 
     #output {
       font-weight: bold;
       margin: 15px 0;
+      font-size: 20px;
+      color: #d32f2f;
     }
 
     ul {
@@ -68,54 +84,87 @@
 
     li {
       background-color: #b2dfdb;
-      margin: 5px auto;
-      padding: 8px 12px;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 10px;
       max-width: 300px;
-      border-radius: 6px;
+      font-size: 18px;
     }
 
     @media (max-width: 600px) {
       button {
         width: 90%;
-        font-size: 14px;
+        font-size: 16px;
+      }
+
+      h1 {
+        font-size: 28px;
       }
     }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .section .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .section p {
+      font-size: 18px;
+    }
+
   </style>
 </head>
 <body>
   <h1>🐸 Tadpole Generator</h1>
+  
+  <div class="container">
+    <!-- Currency Earning Section -->
+    <div class="section">
+      <button onclick="addCurrency()">Earn +<span id="earnRateDisplay">1</span> Currency</button>
+      <p class="currency-info">Currency: <span id="currency">0</span></p>
+    </div>
 
-  <div class="section">
-    <button onclick="addCurrency()">Earn +<span id="earnRateDisplay">1</span> Currency</button>
-    <p>Currency: <span id="currency">0</span></p>
-  </div>
+    <!-- Upgrades Section -->
+    <div class="section">
+      <h3>Upgrades</h3>
+      <p class="upgrade-info">Current Earn Rate: <span id="earnRateLevel">+1</span></p>
+      <button class="upgrade-btn" onclick="upgradeEarning()">Upgrade to +<span id="nextEarnRate">2</span> (Cost: <span id="upgradeCost">10000</span>)</button>
+    </div>
 
-  <div class="section">
-    <h3>Upgrades</h3>
-    <p>Current Earn Rate: <span id="earnRateLevel">+1</span></p>
-    <button class="upgrade-btn" onclick="upgradeEarning()">
-      Upgrade to +<span id="nextEarnRate">2</span> (Cost: <span id="upgradeCost">10000</span>)
-    </button>
-  </div>
+    <!-- Luck Boost Section -->
+    <div class="section">
+      <h3>Luck Boost</h3>
+      <div class="btn-group">
+        <button class="boost-btn" onclick="buyLuckBoost(1.5, 200)">1.5× Luck (200)</button>
+        <button class="boost-btn" onclick="buyLuckBoost(3, 400)">3× Luck (400)</button>
+        <button class="boost-btn" onclick="buyLuckBoost(5, 800)">5× Luck (800)</button>
+      </div>
+      <p>Current Boost: <span id="luck">None</span></p>
+    </div>
 
-  <div class="section">
-    <h3>Buy Luck Boost</h3>
-    <button class="boost-btn" onclick="buyLuckBoost(1.5, 200)">1.5× Luck (200)</button>
-    <button class="boost-btn" onclick="buyLuckBoost(3, 400)">3× Luck (400)</button>
-    <button class="boost-btn" onclick="buyLuckBoost(5, 800)">5× Luck (800)</button>
-    <p>Current Boost: <span id="luck">None</span></p>
-  </div>
+    <!-- Crates Section -->
+    <div class="section">
+      <h3>Open Crates</h3>
+      <div class="btn-group">
+        <button onclick="generateTadpole(50)">Standard Tadpole Crate (50)</button>
+        <button onclick="generateTadpole(100)">Rare Tadpole Crate (100)</button>
+      </div>
+      <p id="output"></p>
+    </div>
 
-  <div class="section">
-    <h3>Open Crates</h3>
-    <button onclick="generateTadpole(50)">Standard Tadpole Crate (50)</button>
-    <button onclick="generateTadpole(100)">Rare Tadpole Crate (100)</button>
-    <p id="output"></p>
-  </div>
-
-  <div class="section">
-    <h3>Hatching History</h3>
-    <ul id="history"></ul>
+    <!-- Hatching History Section -->
+    <div class="section">
+      <h3>Hatching History</h3>
+      <ul id="history"></ul>
+    </div>
   </div>
 
   <script>
