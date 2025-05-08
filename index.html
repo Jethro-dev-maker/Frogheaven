@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tadpole Minigame Hub</title>
+  <title>Tadpole Game Hub</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -13,22 +13,18 @@
       margin: 0;
       padding: 0;
     }
-
     h1, h2 {
       text-align: center;
       color: #33691e;
     }
-
     .screen {
       display: none;
       padding: 20px;
       text-align: center;
     }
-
     .active {
       display: block;
     }
-
     button {
       padding: 10px 20px;
       margin: 10px;
@@ -38,12 +34,10 @@
       border-radius: 10px;
       cursor: pointer;
     }
-
     button:hover {
       background-color: #33691e;
     }
-
-    #game-area {
+    #game-area, #game-area-golden, #defend-area {
       position: relative;
       width: 100%;
       height: 300px;
@@ -51,7 +45,6 @@
       overflow: hidden;
       margin-top: 10px;
     }
-
     .tadpole {
       position: absolute;
       width: 40px;
@@ -63,26 +56,9 @@
       color: white;
       font-weight: bold;
     }
-
     .golden {
       background-color: gold !important;
     }
-
-    #history {
-      list-style: none;
-      max-height: 150px;
-      overflow-y: auto;
-      padding: 0;
-      margin: 0 auto;
-      max-width: 400px;
-      background: #e8f5e9;
-    }
-
-    #history li {
-      padding: 5px;
-      border-bottom: 1px solid #ccc;
-    }
-
     .click-box {
       border: 2px dashed #33691e;
       padding: 20px;
@@ -94,149 +70,149 @@
   </style>
 </head>
 <body>
-  <h1>🐸 Tadpole Game Hub</h1>
-  <h2>Tadpoles: <span id="tadpoleCount">0</span></h2>
-
-  <div class="screen active" id="menuScreen">
-    <button onclick="switchScreen('clickerScreen')">🖱️ Clicker (100 Clicks = 1 Tadpole)</button><br>
-    <button onclick="switchScreen('catcherScreen')">🎮 Tadpole Catcher</button><br>
-    <button onclick="startGoldenCatch()">🌟 Golden Tadpole Catch (15-min cooldown)</button><br>
-    <button onclick="switchScreen('defendScreen')">🛡️ Defend the Frog Kingdom</button>
-  </div>
-
-  <!-- Clicker -->
-  <div class="screen" id="clickerScreen">
-    <h2>Manual Clicker</h2>
-    <div class="click-box" onclick="clickCounter()">Click Me!</div>
-    <p>Clicks: <span id="clicks">0</span> / 100</p>
-    <button onclick="switchScreen('menuScreen')">Back to Menu</button>
-  </div>
-
-  <!-- Tadpole Catcher -->
-  <div class="screen" id="catcherScreen">
-    <h2>Tadpole Catcher</h2>
-    <div id="game-area"></div>
-    <ul id="history"></ul>
-    <button onclick="switchScreen('menuScreen')">Back to Menu</button>
-  </div>
-
-  <!-- Golden Catch -->
-  <div class="screen" id="goldenScreen">
-    <h2>Golden Tadpole Catch</h2>
-    <p>Catch golden tadpoles worth 5x!</p>
-    <div id="game-area-golden"></div>
-    <button onclick="switchScreen('menuScreen')">Back to Menu</button>
-  </div>
-
-  <!-- Defend Frog Kingdom -->
-  <div class="screen" id="defendScreen">
-    <h2>Defend Your Frog Kingdom</h2>
-    <p>Coming soon! You’ll need to defeat waves of tadpoles or lose your kingdom!</p>
-    <button onclick="switchScreen('menuScreen')">Back to Menu</button>
-  </div>
-
-  <script>
-    let tadpoles = 0;
-    let clicks = 0;
-    let history = [];
-    let goldenCooldown = 0;
-
-    function updateDisplay() {
-      document.getElementById("tadpoleCount").innerText = tadpoles;
-      document.getElementById("clicks").innerText = clicks;
-      renderHistory();
-    }
-
-    function switchScreen(id) {
-      document.querySelectorAll('.screen').forEach(screen => {
-        screen.classList.remove('active');
-      });
-      document.getElementById(id).classList.add('active');
-    }
-
-    // Clicker Logic
-    function clickCounter() {
-      clicks++;
-      if (clicks >= 100) {
-        tadpoles++;
-        clicks = 0;
-      }
-      updateDisplay();
-    }
-
-    // Tadpole Catcher Game
-    function spawnTadpole(areaId, isGolden = false) {
-      const gameArea = document.getElementById(areaId);
-      const t = document.createElement("div");
-      t.classList.add("tadpole");
-      if (isGolden && Math.random() < 0.1) t.classList.add("golden");
-
-      t.innerText = "🐸";
-      const size = Math.random() * 30 + 30;
-      t.style.width = size + "px";
-      t.style.height = size + "px";
-      t.style.left = Math.random() * (gameArea.offsetWidth - size) + "px";
-      t.style.top = "-40px";
-
-      gameArea.appendChild(t);
-
-      const fallSpeed = Math.random() * 2 + 1;
-      const fall = setInterval(() => {
-        const currentTop = parseFloat(t.style.top);
-        if (currentTop > gameArea.offsetHeight) {
-          t.remove();
-          clearInterval(fall);
-        } else {
-          t.style.top = currentTop + fallSpeed + "px";
-        }
-      }, 10);
-
-      t.onclick = function () {
-        const reward = t.classList.contains("golden") ? 5 : 1;
-        tadpoles += reward;
-        history.unshift(t.classList.contains("golden") ? "Golden Tadpole" : "Tadpole");
-        if (history.length > 20) history.pop();
-        updateDisplay();
+<h1>🐸 Tadpole Game Hub</h1>
+<h2>Tadpoles: <span id="tadpoleCount">0</span></h2>
+<div class="screen active" id="menuScreen">
+  <button onclick="switchScreen('clickerScreen')">Clicker</button>
+  <button onclick="switchScreen('defendScreen')">Defend the Frog Kingdom</button>
+  <button onclick="startGoldenCatch()">Golden Frog Catch</button>
+</div>
+<div class="screen" id="clickerScreen">
+  <h2>Manual Clicker</h2>
+  <div class="click-box" onclick="clickCounter()">Click Me!</div>
+  <p>Clicks: <span id="clicks">0</span> / 100</p>
+  <button onclick="switchScreen('menuScreen')">Back</button>
+</div>
+<div class="screen" id="defendScreen">
+  <h2>Defend the Frog Kingdom</h2>
+  <p>HP: <span id="frogHp">5</span> | Level: <span id="frogLevel">1</span></p>
+  <div id="defend-area"></div>
+  <p><button onclick="startDefendGame()">Start</button>
+  <button onclick="switchScreen('menuScreen')">Back</button></p>
+</div>
+<div class="screen" id="goldenScreen">
+  <h2>Golden Frog Catch</h2>
+  <p>Catch golden frogs worth 5x tadpoles!</p>
+  <div id="game-area-golden"></div>
+  <button onclick="switchScreen('menuScreen')">Back</button>
+</div>
+<audio id="clickSound" src="https://www.soundjay.com/button/button-1.mp3"></audio>
+<audio id="missSound" src="https://www.soundjay.com/button/beep-07.mp3"></audio>
+<script>
+let tadpoles = parseInt(localStorage.getItem("tadpoles")) || 0;
+let clicks = parseInt(localStorage.getItem("clicks")) || 0;
+let frogLevel = parseInt(localStorage.getItem("frogLevel")) || 1;
+let goldenCooldown = parseInt(localStorage.getItem("goldenCooldown")) || 0;
+let clickSound = document.getElementById("clickSound");
+let missSound = document.getElementById("missSound");
+function updateDisplay() {
+  document.getElementById("tadpoleCount").innerText = tadpoles;
+  document.getElementById("clicks").innerText = clicks;
+  document.getElementById("frogLevel").innerText = frogLevel;
+  localStorage.setItem("tadpoles", tadpoles);
+  localStorage.setItem("clicks", clicks);
+  localStorage.setItem("frogLevel", frogLevel);
+  localStorage.setItem("goldenCooldown", goldenCooldown);
+}
+function switchScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function clickCounter() {
+  clicks++;
+  clickSound.play();
+  if (clicks >= 100) {
+    tadpoles++;
+    clicks = 0;
+  }
+  updateDisplay();
+}
+function startDefendGame() {
+  let hp = 5;
+  let tadpolesEarned = 5 + 10 * (frogLevel - 1);
+  let speed = 2 * Math.pow(1.1, frogLevel - 1);
+  let tadpoleCount = frogLevel + 2;
+  document.getElementById("frogHp").innerText = hp;
+  const area = document.getElementById("defend-area");
+  area.innerHTML = "";
+  function spawn() {
+    const t = document.createElement("div");
+    t.classList.add("tadpole");
+    t.style.left = Math.random() * (area.offsetWidth - 40) + "px";
+    t.style.top = "0px";
+    area.appendChild(t);
+    let fall = setInterval(() => {
+      let top = parseFloat(t.style.top);
+      if (top > area.offsetHeight - 40) {
+        missSound.play();
         t.remove();
         clearInterval(fall);
-      };
-    }
-
-    setInterval(() => spawnTadpole("game-area"), 1000);
-
-    function renderHistory() {
-      const list = document.getElementById("history");
-      list.innerHTML = "";
-      history.forEach(item => {
-        const li = document.createElement("li");
-        li.innerText = item;
-        list.appendChild(li);
-      });
-    }
-
-    // Golden Catch Game
-    function startGoldenCatch() {
-      const now = Date.now();
-      if (now < goldenCooldown) {
-        const minsLeft = Math.ceil((goldenCooldown - now) / 60000);
-        alert("Golden Catch is on cooldown. Try again in " + minsLeft + " minute(s).");
-        return;
+        hp--;
+        document.getElementById("frogHp").innerText = hp;
+        if (hp <= 0) {
+          alert("Game Over!");
+          area.innerHTML = "";
+        }
+      } else {
+        t.style.top = top + speed + "px";
       }
-
-      goldenCooldown = now + 15 * 60 * 1000; // 15 minutes
-      switchScreen("goldenScreen");
-
-      const area = document.getElementById("game-area-golden");
-      area.innerHTML = "";
-      const interval = setInterval(() => spawnTadpole("game-area-golden", true), 1000);
-      setTimeout(() => {
-        clearInterval(interval);
-        alert("Golden Catch over!");
-        switchScreen("menuScreen");
-      }, 10000); // 10 seconds
+    }, 20);
+    t.onclick = function() {
+      clickSound.play();
+      clearInterval(fall);
+      t.remove();
+    };
+  }
+  let count = 0;
+  let interval = setInterval(() => {
+    if (count >= tadpoleCount) {
+      clearInterval(interval);
+      if (hp > 0) {
+        alert("Victory! You earned " + tadpolesEarned + " tadpoles.");
+        tadpoles += tadpolesEarned;
+        frogLevel++;
+        updateDisplay();
+        area.innerHTML = "";
+      }
+    } else {
+      spawn();
+      count++;
     }
-
-    updateDisplay();
-  </script>
+  }, 1000);
+}
+function startGoldenCatch() {
+  const now = Date.now();
+  if (now < goldenCooldown) {
+    let minsLeft = Math.ceil((goldenCooldown - now) / 60000);
+    alert("Golden Frog Catch is on cooldown. Try again in " + minsLeft + " minute(s).");
+    return;
+  }
+  goldenCooldown = now + 15 * 60 * 1000;
+  switchScreen("goldenScreen");
+  const area = document.getElementById("game-area-golden");
+  area.innerHTML = "";
+  const interval = setInterval(() => {
+    const t = document.createElement("div");
+    t.classList.add("tadpole", "golden");
+    t.style.left = Math.random() * (area.offsetWidth - 40) + "px";
+    t.style.top = Math.random() * (area.offsetHeight - 40) + "px";
+    t.innerText = "⭐";
+    area.appendChild(t);
+    t.onclick = () => {
+      tadpoles += 5;
+      clickSound.play();
+      t.remove();
+      updateDisplay();
+    };
+    setTimeout(() => t.remove(), 3000);
+  }, 800);
+  setTimeout(() => {
+    clearInterval(interval);
+    alert("Golden Frog Catch over!");
+    switchScreen("menuScreen");
+  }, 10000);
+}
+updateDisplay();
+</script>
 </body>
 </html>
