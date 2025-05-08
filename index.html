@@ -1,32 +1,55 @@
-<!DOCTYPE html>
+
+    
+       <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tadpole Catcher Game</title>
+  <title>Tadpole Minigame Hub</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #c8e6c9;
-      text-align: center;
-      overflow: hidden;
+      background: #dcedc8;
       margin: 0;
       padding: 0;
     }
 
-    h1 {
-      background-color: #2e7d32;
-      color: white;
-      margin: 0;
+    h1, h2 {
+      text-align: center;
+      color: #33691e;
+    }
+
+    .screen {
+      display: none;
       padding: 20px;
+      text-align: center;
+    }
+
+    .active {
+      display: block;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      background-color: #558b2f;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #33691e;
     }
 
     #game-area {
       position: relative;
       width: 100%;
-      height: 70vh;
+      height: 300px;
       background-color: #a5d6a7;
       overflow: hidden;
+      margin-top: 10px;
     }
 
     .tadpole {
@@ -41,111 +64,114 @@
       font-weight: bold;
     }
 
-    button {
-      padding: 10px 20px;
-      margin: 10px;
-      background-color: #388e3c;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    button:hover {
-      background-color: #1b5e20;
-    }
-
-    .status {
-      font-size: 18px;
-      margin: 10px 0;
+    .golden {
+      background-color: gold !important;
     }
 
     #history {
       list-style: none;
-      padding: 0;
       max-height: 150px;
       overflow-y: auto;
-      background: #e8f5e9;
-      margin: 20px auto;
-      width: 90%;
+      padding: 0;
+      margin: 0 auto;
       max-width: 400px;
-      border-radius: 10px;
+      background: #e8f5e9;
     }
 
     #history li {
       padding: 5px;
       border-bottom: 1px solid #ccc;
     }
+
+    .click-box {
+      border: 2px dashed #33691e;
+      padding: 20px;
+      margin: 20px auto;
+      width: 200px;
+      cursor: pointer;
+      background: #f1f8e9;
+    }
   </style>
 </head>
 <body>
-  <h1>🎣 Tadpole Catcher</h1>
+  <h1>🐸 Tadpole Game Hub</h1>
+  <h2>Tadpoles: <span id="tadpoleCount">0</span></h2>
 
-  <div class="status">Tadpoles: <span id="tadpoles">0</span></div>
-  <div class="status">Luck Boost: <span id="luck-status">Inactive</span></div>
-  <div class="status">Rod: <span id="rod-type">Basic Rod</span></div>
+  <div class="screen active" id="menuScreen">
+    <button onclick="switchScreen('clickerScreen')">🖱️ Clicker (100 Clicks = 1 Tadpole)</button><br>
+    <button onclick="switchScreen('catcherScreen')">🎮 Tadpole Catcher</button><br>
+    <button onclick="startGoldenCatch()">🌟 Golden Tadpole Catch (15-min cooldown)</button><br>
+    <button onclick="switchScreen('defendScreen')">🛡️ Defend the Frog Kingdom</button>
+  </div>
 
-  <button onclick="buyLuckBoost()">Buy Luck Boost (50 Tadpoles)</button>
-  <button onclick="upgradeRod()">Upgrade Rod (100 Tadpoles)</button>
+  <!-- Clicker -->
+  <div class="screen" id="clickerScreen">
+    <h2>Manual Clicker</h2>
+    <div class="click-box" onclick="clickCounter()">Click Me!</div>
+    <p>Clicks: <span id="clicks">0</span> / 100</p>
+    <button onclick="switchScreen('menuScreen')">Back to Menu</button>
+  </div>
 
-  <div id="game-area"></div>
+  <!-- Tadpole Catcher -->
+  <div class="screen" id="catcherScreen">
+    <h2>Tadpole Catcher</h2>
+    <div id="game-area"></div>
+    <ul id="history"></ul>
+    <button onclick="switchScreen('menuScreen')">Back to Menu</button>
+  </div>
 
-  <h3>Catch History:</h3>
-  <ul id="history"></ul>
+  <!-- Golden Catch -->
+  <div class="screen" id="goldenScreen">
+    <h2>Golden Tadpole Catch</h2>
+    <p>Catch golden tadpoles worth 5x!</p>
+    <div id="game-area-golden"></div>
+    <button onclick="switchScreen('menuScreen')">Back to Menu</button>
+  </div>
+
+  <!-- Defend Frog Kingdom -->
+  <div class="screen" id="defendScreen">
+    <h2>Defend Your Frog Kingdom</h2>
+    <p>Coming soon! You’ll need to defeat waves of tadpoles or lose your kingdom!</p>
+    <button onclick="switchScreen('menuScreen')">Back to Menu</button>
+  </div>
 
   <script>
     let tadpoles = 0;
-    let luckBoost = false;
-    let rodLevel = 0;
+    let clicks = 0;
     let history = [];
-
-    const rodTypes = ["Basic Rod", "Copper Rod", "Silver Rod", "Golden Rod"];
-    const rodChances = [
-      [50, 30, 15, 5],    // Basic
-      [40, 30, 20, 10],   // Copper
-      [30, 30, 25, 15],   // Silver
-      [20, 25, 30, 25],   // Golden
-    ];
+    let goldenCooldown = 0;
 
     function updateDisplay() {
-      document.getElementById("tadpoles").innerText = tadpoles;
-      document.getElementById("luck-status").innerText = luckBoost ? "Active" : "Inactive";
-      document.getElementById("rod-type").innerText = rodTypes[rodLevel];
+      document.getElementById("tadpoleCount").innerText = tadpoles;
+      document.getElementById("clicks").innerText = clicks;
+      renderHistory();
     }
 
-    function buyLuckBoost() {
-      if (tadpoles >= 50 && !luckBoost) {
-        tadpoles -= 50;
-        luckBoost = true;
-        updateDisplay();
-        setTimeout(() => {
-          luckBoost = false;
-          updateDisplay();
-        }, 30000);
-      } else {
-        alert(luckBoost ? "Already active!" : "Not enough Tadpoles!");
+    function switchScreen(id) {
+      document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.remove('active');
+      });
+      document.getElementById(id).classList.add('active');
+    }
+
+    // Clicker Logic
+    function clickCounter() {
+      clicks++;
+      if (clicks >= 100) {
+        tadpoles++;
+        clicks = 0;
       }
+      updateDisplay();
     }
 
-    function upgradeRod() {
-      if (rodLevel < rodTypes.length - 1 && tadpoles >= 100) {
-        rodLevel++;
-        tadpoles -= 100;
-        updateDisplay();
-      } else if (rodLevel >= rodTypes.length - 1) {
-        alert("You already have the best rod!");
-      } else {
-        alert("Not enough Tadpoles!");
-      }
-    }
-
-    function spawnTadpole() {
-      const gameArea = document.getElementById("game-area");
+    // Tadpole Catcher Game
+    function spawnTadpole(areaId, isGolden = false) {
+      const gameArea = document.getElementById(areaId);
       const t = document.createElement("div");
       t.classList.add("tadpole");
-      t.innerText = "🐸";
+      if (isGolden && Math.random() < 0.1) t.classList.add("golden");
 
+      t.innerText = "🐸";
       const size = Math.random() * 30 + 30;
       t.style.width = size + "px";
       t.style.height = size + "px";
@@ -166,36 +192,17 @@
       }, 10);
 
       t.onclick = function () {
-        catchTadpole();
+        const reward = t.classList.contains("golden") ? 5 : 1;
+        tadpoles += reward;
+        history.unshift(t.classList.contains("golden") ? "Golden Tadpole" : "Tadpole");
+        if (history.length > 20) history.pop();
+        updateDisplay();
         t.remove();
         clearInterval(fall);
       };
     }
 
-    function catchTadpole() {
-      tadpoles++;
-      updateDisplay();
-
-      const chance = rodChances[rodLevel];
-      const roll = Math.random() * 100;
-      const multiplier = luckBoost ? 1.5 : 1;
-      let cumulative = 0;
-      let result = "Common Tadpole";
-
-      const outcomes = ["Common Tadpole", "Tree Frog Tadpole", "Axolotl Larvae", "Golden Tadpole"];
-
-      for (let i = 0; i < chance.length; i++) {
-        cumulative += chance[i] * multiplier;
-        if (roll < cumulative) {
-          result = outcomes[i];
-          break;
-        }
-      }
-
-      history.unshift(result);
-      if (history.length > 20) history.pop();
-      renderHistory();
-    }
+    setInterval(() => spawnTadpole("game-area"), 1000);
 
     function renderHistory() {
       const list = document.getElementById("history");
@@ -207,11 +214,29 @@
       });
     }
 
+    // Golden Catch Game
+    function startGoldenCatch() {
+      const now = Date.now();
+      if (now < goldenCooldown) {
+        const minsLeft = Math.ceil((goldenCooldown - now) / 60000);
+        alert("Golden Catch is on cooldown. Try again in " + minsLeft + " minute(s).");
+        return;
+      }
+
+      goldenCooldown = now + 15 * 60 * 1000; // 15 minutes
+      switchScreen("goldenScreen");
+
+      const area = document.getElementById("game-area-golden");
+      area.innerHTML = "";
+      const interval = setInterval(() => spawnTadpole("game-area-golden", true), 1000);
+      setTimeout(() => {
+        clearInterval(interval);
+        alert("Golden Catch over!");
+        switchScreen("menuScreen");
+      }, 10000); // 10 seconds
+    }
+
     updateDisplay();
-    setInterval(spawnTadpole, 1000); // Spawn tadpoles every second
   </script>
 </body>
 </html>
-
-     
-      
