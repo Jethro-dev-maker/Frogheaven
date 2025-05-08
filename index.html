@@ -3,260 +3,215 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tadpole Generator</title>
+  <title>Tadpole Catcher Game</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #e0f7fa;
-      color: #004d40;
+      font-family: Arial, sans-serif;
+      background-color: #c8e6c9;
       text-align: center;
-      padding: 30px;
-    }
-
-    h1 {
-      color: #00796b;
-    }
-
-    #tadpole {
-      width: 150px;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-
-    #tadpole:hover {
-      transform: scale(1.1);
-    }
-
-    .currency-display {
-      font-size: 24px;
-      margin: 20px 0;
-    }
-
-    .section {
-      margin: 20px auto;
-      max-width: 600px;
-      text-align: left;
-    }
-
-    .section h2 {
-      background-color: #00796b;
-      color: white;
-      padding: 10px;
+      overflow: hidden;
       margin: 0;
-      cursor: pointer;
-    }
-
-    .section-content {
-      border: 1px solid #00796b;
-      border-top: none;
-      padding: 10px;
-      display: none;
-      background-color: #ffffff;
-    }
-
-    button {
-      background-color: #00796b;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      margin: 5px 0;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    button:hover {
-      background-color: #004d40;
-    }
-
-    #output {
-      font-weight: bold;
-      margin: 15px 0;
-    }
-
-    ul {
-      list-style-type: none;
       padding: 0;
     }
 
-    li {
-      background-color: #b2dfdb;
-      margin: 5px 0;
-      padding: 8px 12px;
-      border-radius: 6px;
+    h1 {
+      background-color: #2e7d32;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+
+    #game-area {
+      position: relative;
+      width: 100%;
+      height: 70vh;
+      background-color: #a5d6a7;
+      overflow: hidden;
+    }
+
+    .tadpole {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background-color: #4caf50;
+      border-radius: 50%;
+      cursor: pointer;
+      line-height: 40px;
+      color: white;
+      font-weight: bold;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      background-color: #388e3c;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #1b5e20;
+    }
+
+    .status {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+
+    #history {
+      list-style: none;
+      padding: 0;
+      max-height: 150px;
+      overflow-y: auto;
+      background: #e8f5e9;
+      margin: 20px auto;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 10px;
+    }
+
+    #history li {
+      padding: 5px;
+      border-bottom: 1px solid #ccc;
     }
   </style>
 </head>
 <body>
-  <h1>🐸 Tadpole Generator</h1>
+  <h1>🎣 Tadpole Catcher</h1>
 
-  <img src="https://example.com/tadpole.png" alt="Tadpole" id="tadpole" onclick="addCurrency()" />
+  <div class="status">Tadpoles: <span id="tadpoles">0</span></div>
+  <div class="status">Luck Boost: <span id="luck-status">Inactive</span></div>
+  <div class="status">Rod: <span id="rod-type">Basic Rod</span></div>
 
-  <div class="currency-display">
-    Currency: <span id="currency">0</span>
-  </div>
+  <button onclick="buyLuckBoost()">Buy Luck Boost (50 Tadpoles)</button>
+  <button onclick="upgradeRod()">Upgrade Rod (100 Tadpoles)</button>
 
-  <div class="section">
-    <h2 onclick="toggleSection('upgradeSection')">Upgrades</h2>
-    <div class="section-content" id="upgradeSection">
-      <p>Current Earn Rate: <span id="earnRate">1</span></p>
-      <button onclick="upgradeEarning()">Upgrade Earning</button>
-    </div>
-  </div>
+  <div id="game-area"></div>
 
-  <div class="section">
-    <h2 onclick="toggleSection('boostSection')">Luck Boosts</h2>
-    <div class="section-content" id="boostSection">
-      <p>Current Luck Boost: <span id="luck">None</span></p>
-      <button onclick="buyLuckBoost(1.5, 200)">1.5× Luck (200 Currency)</button>
-      <button onclick="buyLuckBoost(3, 400)">3× Luck (400 Currency)</button>
-      <button onclick="buyLuckBoost(5, 800)">5× Luck (800 Currency)</button>
-    </div>
-  </div>
-
-  <div class="section">
-    <h2 onclick="toggleSection('crateSection')">Crates</h2>
-    <div class="section-content" id="crateSection">
-      <button onclick="generateTadpole(50)">Standard Tadpole Crate (50 Currency)</button>
-      <button onclick="generateTadpole(100)">Rare Tadpole Crate (100 Currency)</button>
-      <p id="output"></p>
-    </div>
-  </div>
-
-  <div class="section">
-    <h2 onclick="toggleSection('historySection')">Hatching History</h2>
-    <div class="section-content" id="historySection">
-      <ul id="history"></ul>
-    </div>
-  </div>
+  <h3>Catch History:</h3>
+  <ul id="history"></ul>
 
   <script>
-    let currency = parseInt(localStorage.getItem("currency")) || 0;
-    let earnRate = parseInt(localStorage.getItem("earnRate")) || 1;
-    let luckMultiplier = parseFloat(localStorage.getItem("luckMultiplier")) || 1;
-    let history = JSON.parse(localStorage.getItem("history")) || [];
+    let tadpoles = 0;
+    let luckBoost = false;
+    let rodLevel = 0;
+    let history = [];
 
-    document.getElementById("currency").innerText = currency;
-    document.getElementById("earnRate").innerText = earnRate;
-    document.getElementById("luck").innerText = luckMultiplier > 1 ? luckMultiplier + "×" : "None";
-    updateHistoryDisplay();
+    const rodTypes = ["Basic Rod", "Copper Rod", "Silver Rod", "Golden Rod"];
+    const rodChances = [
+      [50, 30, 15, 5],    // Basic
+      [40, 30, 20, 10],   // Copper
+      [30, 30, 25, 15],   // Silver
+      [20, 25, 30, 25],   // Golden
+    ];
 
-    function addCurrency() {
-      currency += earnRate;
-      updateCurrency();
+    function updateDisplay() {
+      document.getElementById("tadpoles").innerText = tadpoles;
+      document.getElementById("luck-status").innerText = luckBoost ? "Active" : "Inactive";
+      document.getElementById("rod-type").innerText = rodTypes[rodLevel];
     }
 
-    function upgradeEarning() {
-      const upgradeCosts = {2: 10000, 3: 50000, 5: 100000};
-      const nextRate = earnRate === 1 ? 2 : earnRate === 2 ? 3 : earnRate === 3 ? 5 : null;
-      if (!nextRate) {
-        alert("Maximum upgrade reached.");
-        return;
-      }
-      const cost = upgradeCosts[nextRate];
-      if (currency >= cost) {
-        currency -= cost;
-        earnRate = nextRate;
-        localStorage.setItem("earnRate", earnRate);
-        document.getElementById("earnRate").innerText = earnRate;
-        updateCurrency();
+    function buyLuckBoost() {
+      if (tadpoles >= 50 && !luckBoost) {
+        tadpoles -= 50;
+        luckBoost = true;
+        updateDisplay();
+        setTimeout(() => {
+          luckBoost = false;
+          updateDisplay();
+        }, 30000);
       } else {
-        alert("Not enough currency to upgrade.");
+        alert(luckBoost ? "Already active!" : "Not enough Tadpoles!");
       }
     }
 
-    function buyLuckBoost(multiplier, cost) {
-      if (currency >= cost) {
-        currency -= cost;
-        luckMultiplier = multiplier;
-        localStorage.setItem("luckMultiplier", luckMultiplier);
-        document.getElementById("luck").innerText = luckMultiplier + "×";
-        updateCurrency();
+    function upgradeRod() {
+      if (rodLevel < rodTypes.length - 1 && tadpoles >= 100) {
+        rodLevel++;
+        tadpoles -= 100;
+        updateDisplay();
+      } else if (rodLevel >= rodTypes.length - 1) {
+        alert("You already have the best rod!");
       } else {
-        alert("Not enough currency for this boost.");
+        alert("Not enough Tadpoles!");
       }
     }
 
-    function generateTadpole(cost) {
-      if (currency < cost) {
-        document.getElementById("output").innerText = "Not enough currency!";
-        return;
-      }
+    function spawnTadpole() {
+      const gameArea = document.getElementById("game-area");
+      const t = document.createElement("div");
+      t.classList.add("tadpole");
+      t.innerText = "🐸";
 
-      const standardTadpoles = [
-        { name: "Common Frog Tadpole", rarity: 50 },
-        { name: "Bullfrog Tadpole", rarity: 25 },
-        { name: "Tree Frog Tadpole", rarity: 15 },
-        { name: "Axolotl Larvae", rarity: 7 },
-        { name: "Poison Dart Frog Tadpole", rarity: 3 },
-      ];
+      const size = Math.random() * 30 + 30;
+      t.style.width = size + "px";
+      t.style.height = size + "px";
+      t.style.left = Math.random() * (gameArea.offsetWidth - size) + "px";
+      t.style.top = "-40px";
 
-      const rareTadpoles = [
-        { name: "Common Frog Tadpole", rarity: 20 },
-        { name: "Bullfrog Tadpole", rarity: 20 },
-        { name: "Tree Frog Tadpole", rarity: 25 },
-        { name: "Axolotl Larvae", rarity: 20 },
-        { name: "Poison Dart Frog Tadpole", rarity: 15 },
-      ];
+      gameArea.appendChild(t);
 
-      let tadpoles = cost === 100 ? rareTadpoles : standardTadpoles;
+      const fallSpeed = Math.random() * 2 + 1;
+      const fall = setInterval(() => {
+        const currentTop = parseFloat(t.style.top);
+        if (currentTop > gameArea.offsetHeight) {
+          t.remove();
+          clearInterval(fall);
+        } else {
+          t.style.top = currentTop + fallSpeed + "px";
+        }
+      }, 10);
 
-      let totalWeight = 0;
-      const boosted = tadpoles.map(t => {
-        const boostedRarity = t.rarity * luckMultiplier;
-        totalWeight += boostedRarity;
-        return { ...t, boostedRarity };
-      });
+      t.onclick = function () {
+        catchTadpole();
+        t.remove();
+        clearInterval(fall);
+      };
+    }
 
-      const roll = Math.random() * totalWeight;
+    function catchTadpole() {
+      tadpoles++;
+      updateDisplay();
+
+      const chance = rodChances[rodLevel];
+      const roll = Math.random() * 100;
+      const multiplier = luckBoost ? 1.5 : 1;
       let cumulative = 0;
-      let chosen = "Nothing—try again!";
+      let result = "Common Tadpole";
 
-      for (let tad of boosted) {
-        cumulative += tad.boostedRarity;
-        if (roll <= cumulative) {
-          chosen = tad.name;
+      const outcomes = ["Common Tadpole", "Tree Frog Tadpole", "Axolotl Larvae", "Golden Tadpole"];
+
+      for (let i = 0; i < chance.length; i++) {
+        cumulative += chance[i] * multiplier;
+        if (roll < cumulative) {
+          result = outcomes[i];
           break;
         }
       }
 
-      document.getElementById("output").innerText = "🎉 Random Tadpole: " + chosen;
-
-      if (chosen !== "Nothing—try again!") {
-        history.push(chosen);
-        if (history.length > 50) history.shift();
-        localStorage.setItem("history", JSON.stringify(history));
-      }
-
-      currency -= cost;
-      updateCurrency();
-      updateHistoryDisplay();
+      history.unshift(result);
+      if (history.length > 20) history.pop();
+      renderHistory();
     }
 
-    function updateCurrency() {
-      document.getElementById("currency").innerText = currency;
-      localStorage.setItem("currency", currency);
-    }
-
-    function updateHistoryDisplay() {
+    function renderHistory() {
       const list = document.getElementById("history");
       list.innerHTML = "";
-      history.slice().reverse().forEach(t => {
+      history.forEach(item => {
         const li = document.createElement("li");
-        li.innerText = t;
+        li.innerText = item;
         list.appendChild(li);
       });
     }
 
-    function toggleSection(id) {
-      const section = document.getElementById(id);
-      section.style.display = section.style.display === "none" ? "block" : "none";
-    }
-
-    // Initialize sections to be hidden
-    document.querySelectorAll('.section-content').forEach(section => {
-      section.style.display = 'none';
-    });
+    updateDisplay();
+    setInterval(spawnTadpole, 1000); // Spawn tadpoles every second
   </script>
 </body>
 </html>
+
+     
+      
