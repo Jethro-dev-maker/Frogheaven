@@ -3,78 +3,75 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tadpole Generator with Upgrades</title>
+  <title>Tadpole Generator</title>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
-      background: linear-gradient(135deg, #f0f8ff, #cce7e6);
-      color: #003d33;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #e0f7fa;
+      color: #004d40;
       text-align: center;
       padding: 30px;
     }
 
     h1 {
-      font-size: 36px;
-      color: #008080;
-      text-shadow: 2px 2px 8px rgba(0, 128, 128, 0.6);
-      margin-bottom: 10px;
-    }
-
-    .section {
-      background-color: rgba(255, 255, 255, 0.9);
-      padding: 20px;
-      margin: 20px auto;
-      border-radius: 15px;
-      max-width: 600px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    .section h3 {
-      font-size: 24px;
       color: #00796b;
     }
 
+    #tadpole {
+      width: 150px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    #tadpole:hover {
+      transform: scale(1.1);
+    }
+
+    .currency-display {
+      font-size: 24px;
+      margin: 20px 0;
+    }
+
+    .section {
+      margin: 20px auto;
+      max-width: 600px;
+      text-align: left;
+    }
+
+    .section h2 {
+      background-color: #00796b;
+      color: white;
+      padding: 10px;
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .section-content {
+      border: 1px solid #00796b;
+      border-top: none;
+      padding: 10px;
+      display: none;
+      background-color: #ffffff;
+    }
+
     button {
-      background-color: #26a69a;
+      background-color: #00796b;
       color: white;
       border: none;
-      padding: 14px 28px;
-      margin: 12px;
-      border-radius: 12px;
-      font-size: 18px;
+      padding: 10px 20px;
+      margin: 5px 0;
+      border-radius: 5px;
       cursor: pointer;
-      transition: background-color 0.3s, transform 0.2s;
+      font-size: 16px;
     }
 
     button:hover {
-      background-color: #00796b;
-      transform: scale(1.05);
-    }
-
-    button:disabled {
-      background-color: #bdbdbd;
-      cursor: not-allowed;
-    }
-
-    .boost-btn {
-      background-color: #4caf50;
-    }
-
-    .upgrade-btn {
-      background-color: #8bc34a;
-    }
-
-    .currency-info, .upgrade-info {
-      font-size: 20px;
-      font-weight: bold;
-      color: #004d40;
+      background-color: #004d40;
     }
 
     #output {
       font-weight: bold;
       margin: 15px 0;
-      font-size: 20px;
-      color: #d32f2f;
     }
 
     ul {
@@ -84,106 +81,64 @@
 
     li {
       background-color: #b2dfdb;
-      margin: 8px 0;
-      padding: 10px;
-      border-radius: 10px;
-      max-width: 300px;
-      font-size: 18px;
+      margin: 5px 0;
+      padding: 8px 12px;
+      border-radius: 6px;
     }
-
-    @media (max-width: 600px) {
-      button {
-        width: 90%;
-        font-size: 16px;
-      }
-
-      h1 {
-        font-size: 28px;
-      }
-    }
-
-    .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .section .btn-group {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    .section p {
-      font-size: 18px;
-    }
-
   </style>
 </head>
 <body>
   <h1>🐸 Tadpole Generator</h1>
-  
-  <div class="container">
-    <!-- Currency Earning Section -->
-    <div class="section">
-      <button onclick="addCurrency()">Earn +<span id="earnRateDisplay">1</span> Currency</button>
-      <p class="currency-info">Currency: <span id="currency">0</span></p>
-    </div>
 
-    <!-- Upgrades Section -->
-    <div class="section">
-      <h3>Upgrades</h3>
-      <p class="upgrade-info">Current Earn Rate: <span id="earnRateLevel">+1</span></p>
-      <button class="upgrade-btn" onclick="upgradeEarning()">Upgrade to +<span id="nextEarnRate">2</span> (Cost: <span id="upgradeCost">10000</span>)</button>
-    </div>
+  <img src="https://example.com/tadpole.png" alt="Tadpole" id="tadpole" onclick="addCurrency()" />
 
-    <!-- Luck Boost Section -->
-    <div class="section">
-      <h3>Luck Boost</h3>
-      <div class="btn-group">
-        <button class="boost-btn" onclick="buyLuckBoost(1.5, 200)">1.5× Luck (200)</button>
-        <button class="boost-btn" onclick="buyLuckBoost(3, 400)">3× Luck (400)</button>
-        <button class="boost-btn" onclick="buyLuckBoost(5, 800)">5× Luck (800)</button>
-      </div>
-      <p>Current Boost: <span id="luck">None</span></p>
-    </div>
+  <div class="currency-display">
+    Currency: <span id="currency">0</span>
+  </div>
 
-    <!-- Crates Section -->
-    <div class="section">
-      <h3>Open Crates</h3>
-      <div class="btn-group">
-        <button onclick="generateTadpole(50)">Standard Tadpole Crate (50)</button>
-        <button onclick="generateTadpole(100)">Rare Tadpole Crate (100)</button>
-      </div>
+  <div class="section">
+    <h2 onclick="toggleSection('upgradeSection')">Upgrades</h2>
+    <div class="section-content" id="upgradeSection">
+      <p>Current Earn Rate: <span id="earnRate">1</span></p>
+      <button onclick="upgradeEarning()">Upgrade Earning</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 onclick="toggleSection('boostSection')">Luck Boosts</h2>
+    <div class="section-content" id="boostSection">
+      <p>Current Luck Boost: <span id="luck">None</span></p>
+      <button onclick="buyLuckBoost(1.5, 200)">1.5× Luck (200 Currency)</button>
+      <button onclick="buyLuckBoost(3, 400)">3× Luck (400 Currency)</button>
+      <button onclick="buyLuckBoost(5, 800)">5× Luck (800 Currency)</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 onclick="toggleSection('crateSection')">Crates</h2>
+    <div class="section-content" id="crateSection">
+      <button onclick="generateTadpole(50)">Standard Tadpole Crate (50 Currency)</button>
+      <button onclick="generateTadpole(100)">Rare Tadpole Crate (100 Currency)</button>
       <p id="output"></p>
     </div>
+  </div>
 
-    <!-- Hatching History Section -->
-    <div class="section">
-      <h3>Hatching History</h3>
+  <div class="section">
+    <h2 onclick="toggleSection('historySection')">Hatching History</h2>
+    <div class="section-content" id="historySection">
       <ul id="history"></ul>
     </div>
   </div>
 
   <script>
     let currency = parseInt(localStorage.getItem("currency")) || 0;
-    let history = JSON.parse(localStorage.getItem("history")) || [];
-    let luckMultiplier = parseFloat(localStorage.getItem("luckMultiplier")) || 1;
     let earnRate = parseInt(localStorage.getItem("earnRate")) || 1;
-
-    const upgradeSteps = [
-      { rate: 2, cost: 10000 },
-      { rate: 3, cost: 50000 },
-      { rate: 5, cost: 100000 },
-    ];
+    let luckMultiplier = parseFloat(localStorage.getItem("luckMultiplier")) || 1;
+    let history = JSON.parse(localStorage.getItem("history")) || [];
 
     document.getElementById("currency").innerText = currency;
-    document.getElementById("luck").innerText = luckMultiplier > 1 ? `${luckMultiplier}x` : "None";
-    document.getElementById("earnRateDisplay").innerText = earnRate;
-    document.getElementById("earnRateLevel").innerText = `+${earnRate}`;
-    updateUpgradeDisplay();
+    document.getElementById("earnRate").innerText = earnRate;
+    document.getElementById("luck").innerText = luckMultiplier > 1 ? luckMultiplier + "×" : "None";
     updateHistoryDisplay();
 
     function addCurrency() {
@@ -192,33 +147,21 @@
     }
 
     function upgradeEarning() {
-      const currentStep = upgradeSteps.find(step => step.rate > earnRate);
-      if (!currentStep) {
-        alert("Max upgrade reached!");
+      const upgradeCosts = {2: 10000, 3: 50000, 5: 100000};
+      const nextRate = earnRate === 1 ? 2 : earnRate === 2 ? 3 : earnRate === 3 ? 5 : null;
+      if (!nextRate) {
+        alert("Maximum upgrade reached.");
         return;
       }
-
-      if (currency >= currentStep.cost) {
-        currency -= currentStep.cost;
-        earnRate = currentStep.rate;
+      const cost = upgradeCosts[nextRate];
+      if (currency >= cost) {
+        currency -= cost;
+        earnRate = nextRate;
         localStorage.setItem("earnRate", earnRate);
+        document.getElementById("earnRate").innerText = earnRate;
         updateCurrency();
-        updateUpgradeDisplay();
       } else {
         alert("Not enough currency to upgrade.");
-      }
-    }
-
-    function updateUpgradeDisplay() {
-      const nextStep = upgradeSteps.find(step => step.rate > earnRate);
-      if (nextStep) {
-        document.getElementById("nextEarnRate").innerText = nextStep.rate;
-        document.getElementById("upgradeCost").innerText = nextStep.cost;
-        document.getElementById("earnRateLevel").innerText = `+${earnRate}`;
-        document.getElementById("earnRateDisplay").innerText = earnRate;
-      } else {
-        document.querySelector(".upgrade-btn").disabled = true;
-        document.querySelector(".upgrade-btn").innerText = "Max Upgrade Reached";
       }
     }
 
@@ -226,11 +169,11 @@
       if (currency >= cost) {
         currency -= cost;
         luckMultiplier = multiplier;
-        updateCurrency();
-        document.getElementById("luck").innerText = `${luckMultiplier}x`;
         localStorage.setItem("luckMultiplier", luckMultiplier);
+        document.getElementById("luck").innerText = luckMultiplier + "×";
+        updateCurrency();
       } else {
-        alert("Not enough currency for that boost!");
+        alert("Not enough currency for this boost.");
       }
     }
 
@@ -304,6 +247,16 @@
         list.appendChild(li);
       });
     }
+
+    function toggleSection(id) {
+      const section = document.getElementById(id);
+      section.style.display = section.style.display === "none" ? "block" : "none";
+    }
+
+    // Initialize sections to be hidden
+    document.querySelectorAll('.section-content').forEach(section => {
+      section.style.display = 'none';
+    });
   </script>
 </body>
 </html>
